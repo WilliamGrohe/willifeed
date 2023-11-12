@@ -12,6 +12,10 @@
   --blue-500: #00AEDA;
 }
 
+:focus {
+  outline: 2px var(--blue-500)
+}
+
 * {
   margin: 0;
   padding: 0;
