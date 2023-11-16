@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { format, formatDistanceToNow } from 'date-fns'
 import ptBR from 'date-fns/locale/pt-BR'
 
 import { Comment } from "./Comment";
 import { Avatar } from './Avatar'
 import styles from "./Post.module.css";
+import { Cpu } from '@phosphor-icons/react';
 
 export function Post({author, content, publishedAt}) {
   const publishedDateFormatted = format(publishedAt, "d 'de' LLLL 'às' HH:mm'h'", {
@@ -14,6 +16,31 @@ export function Post({author, content, publishedAt}) {
     locale: ptBR,
     addSuffix: true,
   })
+
+  const [comments, setComments] = useState([
+    'Primeiro post!'
+  ])
+
+  const [newCommentText, setNewCommentText] = useState('')
+
+  function handleCreateNewComment() {
+    event.preventDefault()
+
+    setComments([...comments, newCommentText])
+    setNewCommentText('')
+  }
+
+  function handleNewCommentChange() {
+    setNewCommentText(event.target.value)
+  }
+
+  function deleteComment(commentToDelete) {
+    const commentsWithoutDeletedOne = comments.filter(comment => {
+      return comment !== commentToDelete
+    })
+
+    setComments(commentsWithoutDeletedOne)
+  }
 
   return (
     <article className={styles.post}>
@@ -32,21 +59,21 @@ export function Post({author, content, publishedAt}) {
       </header>
 
       <div className={styles.content}>
-        {content.map( line =>{
+        {content.map(line => {
             if ( line.type === 'paragraph'){
-              return <p>{line.content}</p>;
+              return <p key={content.line}>{line.content}</p>;
             } else if (line.type === 'link') {
-              return <p><a href="#">{line.content}</a></p>
+              return <p key={content.line}><a href="#">{line.content}</a></p>
             }
         })}
       </div>
 
       <div className={styles.divider}></div>
 
-      <form className={styles.commentForm}>
+      <form onSubmit={handleCreateNewComment} className={styles.commentForm}>
         <strong>Deixe seu feedback</strong>
 
-        <textarea placeholder="Deixe um comentário" />
+        <textarea name="commentInput" onChange={handleNewCommentChange} value={newCommentText} placeholder="Deixe um comentário" />
 
         <footer>
           <button type="submit">Publicar</button>
@@ -54,9 +81,9 @@ export function Post({author, content, publishedAt}) {
       </form>
 
       <div className={styles.commentList}>
-        <Comment />
-        <Comment />
-        <Comment />
+        {comments.map(comment => {
+          return <Comment key={comment} content={comment} onDeleteComment={deleteComment}/>
+        })}
       </div>
     </article>
   );
